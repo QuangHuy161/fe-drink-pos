@@ -1,0 +1,21 @@
+main
+    top
+        user 
+    menu
+        vat tu
+        banhang
+        nhanvien
+    sub-catalog 
+        sub-catalog-el
+    tool
+        them
+        sua
+        xoa
+        refesh
+    table
+
+
+edit-detail
+    title
+    value
+    button-save

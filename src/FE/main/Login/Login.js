@@ -15,7 +15,7 @@ function Login(props) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if(authMode ==='signin'){
-        Axios.post('http://localhost:5000/login',{
+        Axios.post('http://103.229.53.71:5000/login',{
         fullname:fullname,
         password:password
       }).then((result) => {
@@ -32,7 +32,7 @@ function Login(props) {
       
     }
     else{
-      Axios.post('http://localhost:5000/auth/signup',{
+      Axios.post('http://103.229.53.71:5000/auth/signup',{
         fullname:fullname,
         password:password,
         role:'staff'

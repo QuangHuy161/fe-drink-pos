@@ -6,6 +6,7 @@ function User(){
             <div className="avatar">
                 <img className="rounded-circle" src={icon_user} alt="" />
                 <span className="name m-2">Nguyễn Văn A</span>
+                <button className="btn btn-primary">Logout</button>
             </div>
         </div>
     )

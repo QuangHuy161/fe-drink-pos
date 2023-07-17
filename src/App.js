@@ -18,12 +18,10 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={<Main/>}>
-            <Route path="/vattu" component={<Supplies/>} />
-            
-            {/* <Route component={NotFound}/> */}
+          <Route path="/" element={<Login/>}>
+
           </Route>
-          <Route path="/nhanvien" element={<Staff/>} />
+          <Route path="/admin" element={<Main/>} />
           <Route path="/banhang" element={<Order/>} />
           <Route path="/auth" element={<Login/>} />
         </Routes>

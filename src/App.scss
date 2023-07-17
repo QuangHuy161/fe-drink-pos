@@ -1,13 +1,61 @@
-.btn{
+.bt{
     font-size: 1.2rem !important;
     font-weight: 600;
     letter-spacing: 1px;
-    a{
-        color: white;
-    }
     background-color: rgb(152, 221, 198) !important;
     transition: 1s linear;
     &:hover{
         background-color: rgb(109, 167, 147) !important;
     }
+    &:active{
+      border-color: transparent !important;
+    }
+}
+
+.btn{
+  border: none !important;
+}
+
+//----------------------CUSTOM SCROLL BAR------------------------
+/* width */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+   box-shadow: 0 0 1px grey;
+    border-radius: 10px;
+  }
+   
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+      background-color: rgb(152, 221, 198) !important;
+    border-radius: 10px;
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(109, 167, 147) !important; 
+  }
+
+.pe{
+  cursor: pointer;
+  color: #198754;
+}
+
+td[data="order"]{
+  background-color: #98ddc6;
+  width: 10vh;
+  height: 3vh;
+  overflow-y: scroll;
+}
+
+.thead-light{
+  position: sticky;
+  top: 0;
+  background-color: #198754;
+  color: white;
+ 
 }

@@ -2,8 +2,10 @@ import './App.css';
 import './App.scss';
 import Main from './FE/main/Main';
 import Supplies from './FE/main/Supplies/Supplies';
-import 'react-bootstrap'
-import 'bootstrap/dist/css/bootstrap.min.css';
+import Order from './FE/main/Order/Order';
+import Staff from './FE/main/Staff/staff';
+import Login from './FE/main/Login/Login';
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -17,15 +19,17 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<Main/>}>
-            <Route path="/banhang" component={<Supplies/>} />
-            {/* <Route path="/nhanvien" component={Contact} /> */}
-            {/* <Route path="/vattu" component={Contact} /> */}
+            <Route path="/vattu" component={<Supplies/>} />
+            
             {/* <Route component={NotFound}/> */}
           </Route>
+          <Route path="/nhanvien" element={<Staff/>} />
+          <Route path="/banhang" element={<Order/>} />
+          <Route path="/auth" element={<Login/>} />
         </Routes>
+        
       </div>
-     
-    </Router>
+      </Router>
   );
 }
 

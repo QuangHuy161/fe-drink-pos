@@ -1,7 +1,7 @@
 import User from "./User/User";
 function Top(){
     return(
-        <div class="top">
+        <div className="top">
             <User/>
         </div>
     )

@@ -4,14 +4,20 @@ import Axios from "axios"
 import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
 import ClearIcon from '@mui/icons-material/Clear';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 function Order(){
 
-    const [ind,setInd] =useState();
+    
     const [price,setPrice] =useState();
     const [order,setOrder] = useState([])
     const [MENU,setMENU]= useState([])
     const [CT,setCT]= useState([])
+    const [ind,setInd] =useState(0);
     const [isLoading, setIsLoading] = useState(false);
+    const [modalShow, setModalShow] = useState(false);
+    const [tempShow, setTempShow] = useState(true);
+    const [dataModal,setDataModal] =useState({})
     useEffect(() => {
         setTimeout(async () =>{
             setIsLoading(true);
@@ -45,12 +51,195 @@ function Order(){
         return item.nhomvattu ==="Topping";
     }
     
-    function Cal_Out(order){
-        for (let index = 0; order < order.length; index++) {
-            console.log(1)
-            
+    function MyVerticallyCenteredModal(props) {
+        
+        if(props.nguyenlieu[0]=== undefined) 
+        return <></>
+        const LoadTopping = ({topp}) =>{
+            if( topp.length === 0) return <></>
+            let t = topp.map( (item,i) => 
+                <tr key={item.ten + i} className="text-start">
+                    <td className="pe-4">{item.ten}</td>
+                    <td >{item.gia}</td>
+                </tr>
+            )
+
+            return <td>{t}</td>
         }
-        return order;
+        
+        if (props.nguyenlieu[0]===undefined|| props.nguyenlieu[0]===null)
+        return (<></>)
+        let tdata=props.nguyenlieu.map((item,index) =>
+            <tr key={item.tenmon + index} >
+                <td className="h6" data={index}> {item.tenmon }</td>
+                <td className="h6 text-end"> {item.gia }</td>
+                <LoadTopping
+                topp={item.topping ===undefined ? []: item.topping}/>
+            </tr>
+        )
+        return (
+            <Modal
+            {...props}
+            size="lg"
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+          >
+            <Modal.Header className="border-primary" closeButton>
+              <Modal.Title id="contained-modal-title-vcenter" >
+                Chi tiết Order
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <h4>{props.tenmon}</h4>
+              <table className="table">
+                    <tbody>
+                        {tdata}
+                    </tbody>
+                </table>
+            </Modal.Body>
+            <Modal.Footer className="border-primary">
+              <Button className="bt" onClick={props.onHide}>Close</Button>
+            </Modal.Footer>
+          </Modal>
+        );
+      }
+    const ShowDetail = (item) => {
+        setModalShow(true)
+        setDataModal(item)
+    }
+    const closeTemp = (e) =>{
+        e.preventDefault();
+        setTempShow(true);
+    }
+    function CalOut({onHide,order}){
+        function LoadOrder(){
+            let key,t;
+            if (order===null)
+            return (<></>)
+            if(typeof(order[0])=== 'undefined' ){
+                if(new Date(order.time).getDate()!== new Date().getDate() ){
+                    localStorage.removeItem('temp_order_info')
+                }
+                key= Object.keys(order)
+                t= key.map((el,i) => {
+                    // if((el === "_id")){
+                    //     return <></>
+                    // }
+                    // else
+                    if((el === "tiendua"||el === "tienthoi"||el === "gia")){
+                        return <td 
+                            key={i} 
+                            data={el}
+                            > 
+                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order[el])}
+                        </td>
+                    }
+                    else
+                    if((el === "time")){
+                        return <td key={i} data={el}> {new Date(order[el]).toLocaleString('en-GB')}</td>
+                    }
+                    else
+                    if(el === "order")
+                        return <td className="pe colorDetail" 
+                        key={i} 
+                        data={el}
+                        onClick={() =>ShowDetail(order[el])} 
+                        > 
+                            Chi tiết
+                        </td>
+                    else{
+                        return <td key={i} data={el}> {order[el]}</td>
+                    }
+                })
+                t=<tr key="">{t}</tr>
+            }
+            else{
+                if(new Date(order[0].time).getDate()!== new Date().getDate() ){
+                    localStorage.removeItem('temp_order_info')
+                }
+                
+                key= Object.keys(order[0])
+                t = order.map((item,index) =>
+                <tr data={index} key={index} className="border-bottom border-primary">
+                {    
+                    key.map((el,i) => {
+                        if((el === "_id")){
+                            return <></>
+                        }
+                        else
+                        if((el === "tiendua"||el === "tienthoi"||el === "gia")){
+                            return <td 
+                                key={i} 
+                                data={el}
+                                > 
+                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item[el])}
+                            </td>
+                        }
+                        else
+                        if((el === "time")){
+                            return <td key={i} data={el}> {new Date(item[el]).toLocaleString('en-GB')}</td>
+                        }
+                        else
+                        if(el === "order")
+                            return <td className="pe colorDetail" 
+                            key={i} 
+                            data={el}
+                            onClick={() =>ShowDetail(item[el])} 
+                            > 
+                                Chi tiết
+                            </td>
+                        else{
+                            return <td key={i} data={el}> {item[el]}</td>
+                        }
+                    })
+                }
+                </tr>
+                )
+            }
+            
+            return(
+                <div style={{
+                    height:"50vh",
+                    overflowY:"scroll"
+                    }}
+                    className="m-3"
+                    >
+                    <table className="w-100 border-1 table-striped table-bordered">
+                        <thead className="thead-light">
+                            <th>Tên khách</th>
+                            <th>SDT</th>
+                            <th>Tiền đưa</th>
+                            <th>Giá bill</th>
+                            <th>Tiền thối</th>
+                            <th>Đơn</th>
+                            <th>Thời gian</th>
+                        </thead>
+                        <tbody>
+                            {t}
+                        </tbody>
+                    </table>
+    
+                    <MyVerticallyCenteredModal
+                        show={modalShow}
+                        nguyenlieu={dataModal}
+                        onHide={() => setModalShow(false)}
+                    />   
+                </div>
+            )
+        }
+        return (
+            <div className={`show-temp-order shadow rounded-3 ${onHide ? "d-none" : ""}`}>
+                <div className="text-end m-2">
+                    <span 
+                    onClick={closeTemp}  
+                    className="price h3 pe">X</span>
+                </div>
+                <div className="h4">
+                    Danh sách hóa đơn
+                </div>
+                <LoadOrder/>
+            </div>
+        )
     }
     
     const addMon= (e) =>{
@@ -60,9 +249,8 @@ function Order(){
             topping:[],
             gia:0
         }
-        
         t.tenmon= e.target.innerText
-        t.gia=Number(e.target.nextSibling.innerHTML)
+        t.gia=Number(e.target.attributes["data-price"].value)
         order.push(t)
         setOrder([...order])
     }
@@ -77,9 +265,7 @@ function Order(){
             gia:0
         }
         topp.ten= e.target.innerText;
-        console.log("--------------------")
-        console.log(order)
-        topp.gia= Number(e.target.nextSibling.innerHTML)
+        topp.gia=Number(e.target.attributes["data-price"].value)
 
         order.at(ind).topping.push(topp)
         setOrder([...order])
@@ -108,10 +294,16 @@ function Order(){
             sum+=element.gia
         }
         setPrice(sum)
-        return<div className="price">
-            {price}
-        </div>;
+        return<span className="price h4">
+            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)}
+        </span>;
         
+    }
+
+    const ChangPrice = ()=>{
+       return <span className="price h4">
+            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order_info.tiendua - price)}
+        </span>;
     }
 
     
@@ -125,26 +317,32 @@ function Order(){
         let m =MENU.filter(mon)
         let tp =MENU.filter(topping)
         tdata_mon = m.map( (item,i) =>
-                    <div className="m-1 rounded bd-highlight poit align-items-center" 
+                <div  className="m-1 bd-highlightalign-items-center" >
+                    <div className=" rounded poit "
                     onClick={addMon} 
                     key={i}
                     >
                         <img  className=""
                         src={item.img} alt="" />
-                        <p data={i} className=" h4">{item.ten}</p>
-                        <p className=" h3">{item.tien}</p>
+                        <p data={i} data-price={item.tien} className=" h4">{item.ten}</p>
+                        
                     </div>
+                    <p className="h4">{item.tien}</p>
+                </div>
         )
         tdata_topping = tp.map( item =>
-                    <div className=" m-1 rounded bd-highlight poit align-items-center" 
+                <div  className=" m-1 bd-highlight align-items-center" >
+                    <div className="rounded  poit"
                     onClick ={addTopping}
                     data={item.ten} 
                     >
                             <img  className="" 
                              src={item.img} alt="" />
-                        <p className=" h4">{item.ten}</p>
-                        <p className=" h3">{item.tien}</p>
+                        <p data-price={item.tien} className=" h4" >{item.ten}</p>
+                        
                     </div>
+                    <p className="h4">{item.tien}</p>
+                </div>
         )
     }
 
@@ -176,9 +374,9 @@ function Order(){
         order.map((item,index) =>
             <tr key={item.tenmon + index} className="border-bottom ">
                 <tr className="h5" key={item.tenmon} onClick={choosedMon}>
-                        <td className={`pe ${index === ind ? "active_item" : ""}`} data={index}> {item.tenmon }</td>
+                        <td className={`pe text-start ${index === ind ? "active_item" : ""}`} data={index}> {item.tenmon }</td>
                         <td className=""> {item.gia }</td>
-                        <span className="pe link-danger" onClick={()=>delMon(index)}><DeleteForeverIcon/></span>
+                        <span className="pe  text-end link-danger" onClick={()=>delMon(index)}><DeleteForeverIcon/></span>
                 </tr>
                 <LoadTopping
                 topp={item.topping}/>
@@ -223,7 +421,10 @@ function Order(){
         time:''
     })
 
-    
+    const handleSave = (e) => {
+        e.preventDefault();
+        setTempShow(false);
+    }
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -249,8 +450,32 @@ function Order(){
         order_info.gia=price;
         order_info.tienthoi=order_info.tiendua-order_info.gia
         order_info.time=new Date();
+        order_info.order= order
+        setOrder_info({...order_info})
 
-        setOrder_info({...order_info,order:order})
+
+        // LƯU TẠM CỦA NGÀY
+        if(localStorage.getItem("temp_order_info")===undefined
+            || localStorage.getItem("temp_order_info")===null){
+            localStorage.setItem("temp_order_info",JSON.stringify(order_info));
+        }
+        else{
+            let arr= [];
+            let t = JSON.parse(localStorage.getItem("temp_order_info"))
+            console.log(t)
+            if(t.length ===undefined){
+                arr.push(JSON.parse(localStorage.getItem("temp_order_info")))
+                arr.push((order_info))
+                localStorage.setItem("temp_order_info",JSON.stringify(arr));
+                console.log(JSON.parse(localStorage.getItem("temp_order_info")))
+            }
+            else{
+                arr= JSON.parse(localStorage.getItem("temp_order_info"))
+                arr.push(order_info)
+                localStorage.setItem("temp_order_info",JSON.stringify(arr));
+                console.log(JSON.parse(localStorage.getItem("temp_order_info")))
+            }
+        }
         //CHECK OFFLINE +++++++++++++++++++
         if(navigator.onLine){
             if(localStorage.getItem("order_info")!==null){
@@ -273,44 +498,24 @@ function Order(){
                     localStorage.removeItem("order_info")
                 }
             }
+            
             Axios.post("http://103.229.53.71:5000/add_order_detail",
                 order_info
             )
-
+            //console.log(order_info)
             //CAL_OUT
             order.forEach(element =>{
                 let mon = CT.filter(item => item.tenmon === element.tenmon)[0]
                 //console.log(mon)
                 //console.log("=============")
-    
-                mon.nguyenlieu.forEach(el1 => {
-                    //console.log(el1.ten,el1.donvi,el1.dinhluong)
-                    let t = MENU.filter(mn =>
-                         mn.ten===el1.ten && mn.nhomvattu===el1.loai
-                        )[0]
-                        t.soluong-=el1.dinhluong
-                        setMENU([...MENU])
-                        //console.log(t)
-                        Axios({
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            url: `http://103.229.53.71:5000/update/list_mon/${t._id}`,
-                            data:t
-                        });
-                })
-            
-                element.topping.forEach( el2 =>{
-                    let topp= CT.filter(item => item.tenmon === el2.ten)[0]
-                    console.log(topp)
-                    topp.nguyenlieu.forEach(el_l => {
-                        console.log(el_l.ten,el_l.loai,el_l.donvi,el_l.dinhluong)
+                if(mon!==undefined){
+                    mon.nguyenlieu.forEach(el1 => {
+                        //console.log(el1.ten,el1.donvi,el1.dinhluong)
                         let t = MENU.filter(mn =>
-                             mn.ten===el_l.ten 
-                             && mn.nhomvattu===el_l.loai
+                            mn.ten===el1.ten && mn.nhomvattu===el1.loai
                             )[0]
-                            t.soluong-=el_l.dinhluong
+                            t.soluong-=el1.dinhluong
                             setMENU([...MENU])
-                            //console.log(t)
                             Axios({
                                 method: 'PUT',
                                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -318,8 +523,31 @@ function Order(){
                                 data:t
                             });
                     })
-    
-                })
+                    //console.log("++++++++++++++++++++++++++++")
+                    element.topping.forEach( el2 =>{
+                        let topp= CT.filter(item => item.tenmon === el2.ten)[0]
+                        //console.log(topp)
+                        //console.log("=============")
+                        if(topp!== undefined){
+                            topp.nguyenlieu.forEach(el_l => {
+                                console.log(el_l.ten,el_l.loai,el_l.donvi,el_l.dinhluong)
+                                let t = MENU.filter(mn =>
+                                    mn.ten===el_l.ten 
+                                    && mn.nhomvattu===el_l.loai
+                                    )[0]
+                                    t.soluong-=el_l.dinhluong
+                                    setMENU([...MENU])
+                                    //console.log(t)
+                                    Axios({
+                                        method: 'PUT',
+                                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                        url: `http://103.229.53.71:5000/update/list_mon/${t._id}`,
+                                        data:t
+                                    });
+                            })
+                        }
+                    })
+                }
             })
             
         }
@@ -353,26 +581,26 @@ function Order(){
     if (isLoading) {
         return (
         <div id="order">
-            <div className="row m-3 main_order">
-                <div data-spy="scroll" className="col-sm-3  overflow-scroll m-2">
-                    <div className="h3">Order</div>
-                    <p className="border-bottom">Danh sách món</p>
+            <div className="row main_order">
+                <div data-spy="scroll" className="col-sm-3  overflow-scroll m-0">
+                    <div className="h3 m-0">Order</div>
+                    <p className="border-bottom m-0">Danh sách món</p>
                     <LoadOrder/>
-                    <h4 className=""> Tổng tiền : <SumPrice/> VND</h4>
+                    <h5 className=""> Tổng tiền : <SumPrice/> VND</h5>
                 </div>
-                <div className="col-sm m-2 gx-0">
+                <div className="col-sm m-0">
                     <div className="row">
-                        <div className="col col-sm-7">
-                            <span className=" text-dark h1">Menu</span>
+                        <div className="col col-sm-7 p-0">
+                            <span className=" text-dark h3">Menu</span>
                             <div data-spy="scroll" 
-                            className="par-poit align-items-stretch p-0 d-flex flex-wrap bd-highlight mb-3">
+                            className="par-poit align-items-stretch d-flex flex-wrap bd-highlight mb-3">
                                 <LoadingSpinner/>
                             </div>
                         </div>
-                        <div className="col col-sm-5 border-start">
-                            <span className=" text-dark h1">Topping</span>
+                        <div className="col col-sm-5 p-0 border-start">
+                            <span className=" text-dark h3">Topping</span>
                             <div data-spy="scroll" 
-                            className="par-poit align-items-stretch p-0 d-flex flex-wrap bd-highlight mb-3">
+                            className="par-poit align-items-stretch d-flex flex-wrap bd-highlight mb-3">
                                 <LoadingSpinner/>
                             </div>
                         </div>
@@ -380,47 +608,61 @@ function Order(){
                 </div>
 
             </div>
-            <div className="row order_info fixed-bottom border-top border-3 border-success p-3">
-                <div className="col-sm-10 text-start m-1">
-                    <form className="container m-0 info_order" >
-                        <div className="input-group mb-1">
-                            <div className="input-group-prepend">
-                                <span className="form_label h6" id="order_ten">Tên khách</span>
+            <div className="row order_info  border-top border-3 border-success ">
+                <div className="col-8 border-right-3 m-1">
+                    <form className="row m-0 info_order" >
+                        <div className="col col-3">
+                            <div className="input-group mb-1">
+                                <div className="input-group-prepend text-start">
+                                    <span className="form_label h6" id="order_ten" >Khách lẻ</span>
+                                </div>
+                                <input type="text" placeholder="Anh A" className="h6 m-0" 
+                                onChange={(e) =>setOrder_info({...order_info,tenkhachhang:e.target.value})}
+                                aria-describedby="order_ten" />
                             </div>
-                            <input type="text" className="h5" 
-                            onChange={(e) =>setOrder_info({...order_info,tenkhachhang:e.target.value})}
-                            aria-describedby="order_ten" />
-                        </div>
 
-                        <div className="input-group mb-1">
-                            <div className="input-group-prepend">
-                                <span className="form_label h6" id="order_sdt">Số điện thoại</span>
+                            <div className="input-group mb-1">
+                                <div className="input-group-prepend text-start">
+                                    <span className="form_label h6" id="order_sdt">Số điện thoại</span>
+                                </div>
+                                <input type="Number" className="h6 m-0"
+                                placeholder="0123456789"  
+                                onChange={(e) =>{
+                                        setOrder_info({...order_info,sdt:e.target.value});
+                                }}   
+                                aria-describedby="order_sdt"/>
                             </div>
-                            <input type="Number" className="h5"  
-                            onChange={(e) =>{
-                                    setOrder_info({...order_info,sdt:e.target.value});
-                            }}   
-                            aria-describedby="order_sdt"/>
                         </div>
-                       
-                        <div className="input-group mb-1">
-                            <div className="input-group-prepend">
-                                <span className="form_label h6">Tiền khách đưa</span>
+                        <div className="col">
+                            <div className="input-group mb-1">
+                                <div className="input-group-prepend text-start">
+                                    <span className="form_label h6">Tiền khách đưa</span>
+                                </div>
+                                <input type="Number" className="h4 m-0" 
+                                placeholder="500"
+                                onChange={(e) =>{
+                                        setOrder_info({...order_info,tiendua:e.target.value * 1000})
+                                }}
+                                aria-label="Amount (to the nearest dollar)"/>
+                                <div className="input-group-append">
+                                    <span className="input-group-text place-ho">.000 VND</span>
+                                </div>
                             </div>
-                            <input type="Number" className="h5" 
-                            onChange={(e) =>{
-                                    setOrder_info({...order_info,tiendua:e.target.value * 1000})
-                            }}
-                            aria-label="Amount (to the nearest dollar)"/>
-                            <div className="input-group-append">
-                                <span className="input-group-text place-ho">.000 VND</span>
+                            <div>
+                                <span className="form_label h4">Tiền thối</span>
+                                <ChangPrice/>
                             </div>
                         </div>
                        
                     </form>
                 </div>
-                <div className=" col-sm button_payment text-end">
-                    <button onClick = {handleSubmit} className="bt btn rounded-1">Hoàn tất</button>
+                <div className="col row button_payment align-self-center">
+                    <div className="col">
+                        <button onClick = {handleSave} className="bt btn btn-warning rounded-1 p-3">Hóa đơn</button>
+                    </div>
+                    <div className="col">
+                        <button onClick = {handleSubmit} className="bt btn rounded-1 p-3">Hoàn tất</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -428,26 +670,26 @@ function Order(){
     }
     return(
         <div id="order">
-            <div className="row m-3 main_order">
-                <div data-spy="scroll" className="col-sm-3  overflow-scroll m-2">
-                    <div className="h3">Order</div>
-                    <p className="border-bottom">Danh sách món</p>
+            <div className="row main_order">
+                <div data-spy="scroll" className="col-sm-3  overflow-scroll m-0">
+                    <div className="h3 m-0">Order</div>
+                    <p className="border-bottom m-0">Danh sách món</p>
                     <LoadOrder/>
-                    <h4 className=""> Tổng tiền : <SumPrice/> VND</h4>
+                    <h5 className=""> Tổng tiền : <SumPrice/> VND</h5>
                 </div>
-                <div className="col-sm m-2 gx-0">
+                <div className="col-sm m-0">
                     <div className="row">
-                        <div className="col col-sm-7">
-                            <span className=" text-dark h1">Menu</span>
+                        <div className="col col-sm-7 p-0">
+                            <span className=" text-dark h3">Menu</span>
                             <div data-spy="scroll" 
-                            className="par-poit align-items-stretch p-0 d-flex flex-wrap bd-highlight mb-3">
+                            className="par-poit align-items-stretch d-flex flex-wrap bd-highlight mb-3">
                                 {tdata_mon}
                             </div>
                         </div>
-                        <div className="col col-sm-5 border-start">
-                            <span className=" text-dark h1">Topping</span>
+                        <div className="col col-sm-5 p-0 border-start">
+                            <span className=" text-dark h3">Topping</span>
                             <div data-spy="scroll" 
-                            className="par-poit align-items-stretch p-0 d-flex flex-wrap bd-highlight mb-3">
+                            className="par-poit align-items-stretch d-flex flex-wrap bd-highlight mb-3">
                                 {tdata_topping}
                             </div>
                         </div>
@@ -455,48 +697,68 @@ function Order(){
                 </div>
 
             </div>
-            <div className="row order_info fixed-bottom border-top border-3 border-success p-3">
-                <div className="col-sm-10 text-start m-1">
-                    <form className="container m-0 info_order" >
-                        <div className="input-group mb-1">
-                            <div className="input-group-prepend">
-                                <span className="form_label h6" id="order_ten">Tên khách</span>
+            <div className="row order_info  border-top border-3 border-success">
+                <div className="col-8 border-right-3 m-1">
+                    <form className="row m-0 info_order" >
+                        <div className="col col-3">
+                            <div className="input-group mb-1">
+                                <div className="input-group-prepend text-start">
+                                    <span className="form_label h6" id="order_ten">Khách lẻ</span>
+                                </div>
+                                <input type="text" placeholder="Anh A" className="h6 m-0" 
+                                onChange={(e) =>setOrder_info({...order_info,tenkhachhang:e.target.value})}
+                                aria-describedby="order_ten"/>
                             </div>
-                            <input type="text" className="h5" 
-                            onChange={(e) =>setOrder_info({...order_info,tenkhachhang:e.target.value})}
-                            aria-describedby="order_ten"/>
-                        </div>
 
-                        <div className="input-group mb-1">
-                            <div className="input-group-prepend">
-                                <span className="form_label h6" id="order_sdt">Số điện thoại</span>
+                            <div className="input-group mb-1">
+                                <div className="input-group-prepend text-start">
+                                    <span className="form_label h6" id="order_sdt">Số điện thoại</span>
+                                </div>
+                                <input type="Number" className="h6 m-0"  
+                                placeholder="0123456789"
+                                onChange={(e) =>{
+                                        setOrder_info({...order_info,sdt:e.target.value});
+                                    
+                                }}
+                                aria-describedby="order_sdt"/>
                             </div>
-                            <input type="Number" className="h5"  
-                            onChange={(e) =>{
-                                    setOrder_info({...order_info,sdt:e.target.value});
-                                
-                            }}
-                            aria-describedby="order_sdt"/>
                         </div>
-                       
-                        <div className="input-group mb-1">
-                            <div className="input-group-prepend">
-                                <span className="form_label h6">Tiền khách đưa</span>
+                        <div className="col">  
+                            <div className="input-group mb-1">
+                                <div className="input-group-prepend text-start">
+                                    <span className="form_label h6">Tiền khách đưa</span>
+                                </div>
+                                <input type="Number" className="h4 m-0" 
+                                placeholder="500"
+                                required
+                                onChange={(e) =>setOrder_info({...order_info,tiendua:e.target.value * 1000})}
+                                aria-label="Amount (to the nearest dollar)"/>
+                                <div className="input-group-append">
+                                    <span className="input-group-text place-ho">.000 VND</span>
+                                </div>
                             </div>
-                            <input type="Number" className="h5" 
-                            onChange={(e) =>setOrder_info({...order_info,tiendua:e.target.value * 1000})}
-                            aria-label="Amount (to the nearest dollar)"/>
-                            <div className="input-group-append">
-                                <span className="input-group-text place-ho">.000 VND</span>
+                            <div>
+                                <span className="form_label h4">Tiền thối</span>
+                                <ChangPrice/>
                             </div>
                         </div>
                        
                     </form>
                 </div>
-                <div className=" col-sm button_payment text-end">
-                    <button onClick = {handleSubmit} className="bt btn rounded-1">Hoàn tất</button>
+                <div className="col row button_payment align-self-center">
+                    <div className="col">
+                        <button onClick = {handleSave} className="bt btn btn-warning rounded-1 p-3">Hóa đơn</button>
+                    </div>
+                    <div className="col">
+                        <button onClick = {handleSubmit} className="bt btn rounded-1 p-3">Hoàn tất</button>
+                    </div>
                 </div>
             </div>
+
+            <CalOut 
+                onHide={tempShow}
+                order={JSON.parse(localStorage.getItem('temp_order_info'))}
+            />
         </div>
     )
 }

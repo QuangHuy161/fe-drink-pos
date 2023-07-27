@@ -1,16 +1,21 @@
 import "./data_table.scss"
 import { MaterialReactTable } from 'material-react-table';
-import { useEffect,useCallback, useState } from "react"
+import { useEffect,useCallback, useState, useMemo } from "react"
 import Axios from "axios"
 import { Delete, Edit } from '@mui/icons-material';
 import {
     Box,
+    Stack,
     IconButton,
     Tooltip,
   } from '@mui/material';
 
 function DATA_TABLE({title,head,label,data}){
     // set the initial state
+    const averageSalary = useMemo(
+        () => data.reduce((acc, curr) => acc + curr.salary, 0) / data.length,
+        [],
+      );
     const [isLoading, setIsLoading] = useState(true);
     let [tableData, setTableData] = useState([]);
     
@@ -61,7 +66,7 @@ function DATA_TABLE({title,head,label,data}){
     let columns= []
     for (let index = 0; index < label.length; index++) {
         let t={}
-        if(head[index]==="ID"||head[index]==="Ảnh"||head[index]==="Thời gian"){
+        if(head[index]==="ID"||head[index]==="Ảnh"){
             t = {
                 header: head[index],
                 accessorKey:label[index],
@@ -70,25 +75,60 @@ function DATA_TABLE({title,head,label,data}){
             }
         }
         else
-        if(head[index]==="Số Lượng"||head[index]==="Tiền"){
+        if(head[index]==="Thời gian"){
+            t = {
+                accessorFn: (row) => new Date(row.time),
+                header: head[index],
+                accessorKey:label[index],
+                enableEditing:false,
+                sortingFn: 'datetime',
+                Cell: ({ cell }) => cell.getValue()?.toLocaleString('en-GB'),
+                size:50
+            }
+        }
+        else
+        if(head[index]==="Số Lượng"){
             t = {
                 header: head[index],
                 accessorKey:label[index],
                 size:50,
                 muiTableBodyCellEditTextFieldProps: {
                     type: 'number',
-                    variant: 'outlined',
-                    helperText: validationErrors, //show error message in helper text.
-                    onChange: (event) => {
-                        const value = event.target.value;
-                        //validation logic
-                        if ((head[index]==="Tiền") && (value % 1000 !== 0)) {
-                        setValidationErrors('Giá tiền phải là bội số của 1000');
-                        } else {
-                            setValidationErrors('');
-                        }
-                    },
-                  },
+                    variant: 'outlined'
+                }
+            }
+        }
+        else
+        if(head[index]==="Tiền"){
+            t = {
+                header: head[index],
+                accessorKey:label[index],
+                size:50,
+        //required to render an aggregated cell, show the average salary in the group
+                AggregatedCell: ({ cell, table }) => (
+                <>
+                    {table.getColumn(cell.row.groupingColumnId ?? '').columnDef.header}:{' '}
+                    <Box sx={{ color: 'success.main', fontWeight: 'bold' }}>
+                    {cell.getValue()?.toLocaleString?.('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                    })}
+                    </Box>
+                </>
+                ),
+                //customize normal cell render on normal non-aggregated rows
+                Cell: ({ cell }) => (
+                  <>
+                    {cell.getValue()?.toLocaleString?.('vi-VN', {
+                      style: 'currency',
+                      currency: 'VND',
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    })}
+                  </>
+                ),
             }
         }
         else
@@ -174,7 +214,7 @@ function DATA_TABLE({title,head,label,data}){
     
     
     return (
-        <div className="row">
+        <div className="container row">
             <h1 className="text-center">{title}</h1>
             <MaterialReactTable
             
@@ -195,7 +235,17 @@ function DATA_TABLE({title,head,label,data}){
                             overflowX:'auto',
                             maxWidth:'160px !important'
                         },
-
+                        '& td:nth-child(7)':{
+                            textAlign:"right",
+                            backgroundColor: '#9d9d9d'
+                        },
+                        '& td:nth-child(8)':{
+                            backgroundColor: '#c8c8c8',
+                            textAlign:"right"
+                        },
+                        '& td:nth-child(9)':{
+                            textAlign:"right"
+                        },
                     },
                   }}
                 muiTablePaperProps={{
@@ -218,11 +268,6 @@ function DATA_TABLE({title,head,label,data}){
                           <Delete />
                         </IconButton>
                       </Tooltip>
-                      {/* <Tooltip arrow placement="right" title="Delete">
-                        <IconButton color="success" onClick={() =>handleDetail(row)}>
-                          <VisibilityIcon/>
-                        </IconButton>
-                      </Tooltip> */}
                     </Box>
                   )}
                 state={{ isLoading }}

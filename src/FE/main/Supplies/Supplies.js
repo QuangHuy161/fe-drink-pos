@@ -8,9 +8,9 @@ Axios.defaults.headers.post['Content-Type'] ='application/x-www-form-urlencoded'
 
 function Supplies(){
     const [vatlieu,setVatlieu] = useState({
-        ten:"A",
-        donvi:"l(lit)",
-        nhomvattu:"Nguyên Liệu",
+        ten:"",
+        donvi:"",
+        nhomvattu:"",
         soluong:0,
         tien:0,
         img:''
@@ -75,16 +75,22 @@ function Supplies(){
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        Axios.post('http://103.229.53.71:5000/add_data', {
-            ten: vatlieu.ten,
-            donvi: vatlieu.donvi,
-            nhomvattu:vatlieu.nhomvattu,
-            img: vatlieu.img,
-            soluong: vatlieu.soluong,
-            tien:(vatlieu.soluong === 0 ?  vatlieu.tien : vatlieu.tien*vatlieu.soluong),
-            time:new Date()
-        })
-        alert(`Đã thêm vật tư ${vatlieu.ten}`)
+        vatlieu.time = new Date();
+        try{
+            Axios.post('http://103.229.53.71:5000/add_data', vatlieu )
+        } 
+        catch (error) {
+            console.error(error);
+        } finally {
+            alert(`Đã thêm vật tư ${vatlieu.ten}`)
+            vatlieu.ten="";
+            vatlieu.soluong=0;
+            vatlieu.tien=0;
+            vatlieu.img='';
+            setVatlieu({...vatlieu})
+        }
+        
+        
     }
         
     if(isLoading)
@@ -106,6 +112,7 @@ function Supplies(){
                 <div className="row m-1">
                     <label className="text-start col-5"> Tên *</label>
                     <input required className="col-7 border p-1 rounded-1" type="text"
+                    placeholder="VD: vật tư A"
                      onChange={(e) => {setVatlieu({...vatlieu,ten:e.target.value})}}
                     /> 
                 </div>
@@ -118,7 +125,7 @@ function Supplies(){
                     </select>
                 </div>
                 <div className="row m-1">
-                    <label className="text-start col-5" > Nhóm vật tư</label>
+                    <label className="text-start col-5" > Loại vật tư</label>
                     <select required className="col-7 border p-1 rounded-1" 
                     onChange={(e) => {setVatlieu({...vatlieu,nhomvattu:e.target.value})}}>
                         {nhomvattu_option}
@@ -127,11 +134,14 @@ function Supplies(){
                 <div className="row m-1">
                     <label className="text-start col-5"> Số Lượng(định theo đơn vị)</label>
                     <input className="col-7 border p-1 rounded-1" type="number" min="0" step="any"
+                    placeholder="VD:50Ly"
                     onChange={(e) => {setVatlieu({...vatlieu,soluong:e.target.value})}}/> 
                 </div>
                 <div className="row m-1">
-                    <label className="text-start col-5"> Giá tiền (/1 đơn vị )</label>
-                    <input className="col-7 border p-1 rounded-1" type="number" min="0" step="100"
+                    <label className="text-start col-5">Giá vốn</label>
+                    <input className="col-7 border p-1 rounded-1" min="0" step="100"
+                    type="number"
+                    placeholder="VNĐ 1,234,567"
                     onChange={(e) => {setVatlieu({...vatlieu,tien:e.target.value})}}/> 
                 </div>
                 <div className="row m-1">

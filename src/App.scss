@@ -46,16 +46,32 @@
 }
 
 td[data="order"]{
+  cursor: pointer;
   background-color: #98ddc6;
-  width: 10vh;
-  height: 3vh;
-  overflow-y: scroll;
+  &:hover{
+    background-color: #4ec89f;
+  }
 }
 
 .thead-light{
   position: sticky;
   top: 0;
-  background-color: #198754;
-  color: white;
+  background-color: rgb(152, 221, 198);
+  color: black;
+  th{
+    border: 1px solid #0d6efd;
+  }
  
+}
+.colorDetail{
+  color: #0d6efd !important;
+}
+
+.textAlignLast{
+  text-align-last: right !important;
+  text-align-last: end !important;
+}
+
+.Overlay-fullSize{
+  width: 60vw !important;
 }

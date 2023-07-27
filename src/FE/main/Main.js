@@ -12,27 +12,30 @@ function Main(props ){
     let [pageMode, setPageMode] = useState("vattu")
 
     let t= (<div id="menu" className="col col-sm-2 " >
+
                 <div className="row m-1">
-                    <button  className=" bt btn btn-menu rounded-1" onClick={() => setPageMode("vattu")} >
-                        <span className="nav-link"  >
-                        Vật tư
-                        </span>
-                    </button>
+                    <a href="/create" className="p-0">
+                        <button  className="btn btn-menu btn-primary rounded-1 w-100" >
+                            <span className="nav-link h4"  >
+                            Tạo đơn vị và loại
+                            </span>
+                        </button>
+                    </a>
                 </div>
+
                 <div className="row m-1">
                     <Dropdown className="bt btn btn-menu rounded-1">
                         <Dropdown.Toggle
-                        className="text-wrap"
+                        className="text-wrap bt btn"
                         style={{
                             border: 'none',
                             color:'black',
                             background:'transparent',
                         }}>
-                            <span>
                                 Thống kê vật tư
-                            </span>
                         </Dropdown.Toggle>
                         <Dropdown.Menu
+                        className="p-0"
                         style={{
                             background:'rgb(152, 221, 198)',
                             border: 'none',
@@ -41,6 +44,12 @@ function Main(props ){
                             boxShadow: '0 0 12px rgb(45, 66, 59)'
                         }}
                         >
+                            <Dropdown.Item
+                            className="bt"
+                            onClick={() => setPageMode("vattu")}
+                            >
+                                Vật tư
+                            </Dropdown.Item>
                             <Dropdown.Item
                             className="bt"
                             onClick={() => setPageMode("donvi")}
@@ -58,13 +67,12 @@ function Main(props ){
                             className="bt"
                             onClick={() => setPageMode("mon")}
                             >
-                                Món
+                                Món và Công thức
                             </Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
                 </div>
 
-            
                 <div className="row m-1">
                     <button  className=" bt btn btn-menu rounded-1">
                         <a href="/banhang" className="nav-link" >
@@ -72,6 +80,7 @@ function Main(props ){
                         </a>
                     </button>
                 </div>
+
                 <div className="row m-1">
                     <button  className=" bt btn btn-menu rounded-1" onClick={() => setPageMode("nhanvien")} >
                         <span className="nav-link"  >
@@ -79,6 +88,7 @@ function Main(props ){
                         </span>
                     </button>
                 </div>
+
                 <div className="row m-1">
                     <button  className=" bt btn btn-menu rounded-1" onClick={() => setPageMode("thongke")} >
                         <span className="nav-link"  >
@@ -96,7 +106,7 @@ function Main(props ){
             </div>
             <div className="row">
                 {t}
-                <div className="col col-sm">
+                <div className="col col-sm-10">
                     <Supplies/>
                 </div>
             </div>
@@ -110,7 +120,7 @@ function Main(props ){
                 </div>
                 <div className="row">
                     {t}
-                    <div className="col col-sm">
+                    <div className="col col-sm-10">
                         <Statis/>
                     </div>
                 </div>
@@ -125,7 +135,7 @@ function Main(props ){
                 </div>
                 <div className="row">
                     {t}
-                    <div className="col col-sm">
+                    <div className="col col-sm-10">
                         <Staff/>
                     </div>
                 </div>
@@ -140,7 +150,7 @@ function Main(props ){
             </div>
             <div className="row">
                 {t}
-                <div className="col col-sm">
+                <div className="col col-sm-10">
                     <Donvi/>
                 </div>
             </div>
@@ -155,7 +165,7 @@ function Main(props ){
             </div>
             <div className="row">
                 {t}
-                <div className="col col-sm">
+                <div className="col col-sm-10">
                     <Nhomvattu/>
                 </div>
             </div>
@@ -169,7 +179,7 @@ function Main(props ){
             </div>
             <div className="row">
                 {t}
-                <div className="col col-sm">
+                <div className="col col-sm-10">
                     <Mon/>
                 </div>
             </div>

@@ -29,4 +29,8 @@ function genID(str){
   }
   return t;
 }
-  export  {removeAccents,genID}
+
+
+
+
+export  {removeAccents,genID}

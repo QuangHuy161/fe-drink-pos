@@ -1,11 +1,21 @@
 import "./login.scss"
-import React, { useState } from "react"
+import React, {useRef, useState} from "react"
 import Axios from "axios"
-import {
-  Navigate,
-  Route
-} from "react-router-dom";
+import AuthContext from "../context/AuthProvider";
+import { useContext } from "react";
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+
+
 function Login(props) {
+  
+  const  auth  = useContext(AuthContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
+
+  const userRef = useRef();
+  const errRef = useRef();
+
   let [authMode, setAuthMode] = useState("signin")
   let [fullname,setFullname] = useState ("admin")
   let [role,setRole] = useState ("staff")
@@ -21,11 +31,24 @@ function Login(props) {
       }).then((result) => {
         setLogin(true)
         setRole(result.data.role)
+        const accessToken = result.data.token;
+
+        // auth.fullname=result.data.fullname
+        // auth.password=result.data.password
+        // auth.role = result.data.role
+        auth.accessToken=accessToken
+
+        console.log(auth)
+        
+
+        // navigate(from, { replace: true });
+
         if(result.data.role==='admin')
           window.location.href = "/admin";
           else{
             window.location.href = "/banhang";
           }
+        navigate(from, { replace: true });
       })
       .catch((error) => {console.log(error);})
       
@@ -38,13 +61,14 @@ function Login(props) {
         role:'staff'
       }).then((result) => {
         setRegister(true);
+        alert("Submited");
       })
       .catch((error) => {
         error = new Error();
       });
     }
 
-    alert("Submited");
+    
 
   }
 
@@ -85,9 +109,7 @@ function Login(props) {
             </div>
             {islogin ? (
             <p className="text-success">You Are Logged in Successfully</p>
-          ) : (
-            <p className="text-danger">You Are Not Logged in</p>
-          )}
+          ) : <></>}
             <div className="d-grid gap-2 mt-3">
               <button type="submit" className="btn btn-primary">
                 Submit

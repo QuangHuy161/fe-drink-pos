@@ -172,6 +172,13 @@ function Mon(){
     if(isLoading)
     return(
         <div> 
+            <div className="row mt-4">
+                <div className="col text-start">
+                    <a href="/admin">
+                    <button className="btn btn-primary"> Tạo vật tư</button>
+                    </a>
+                </div>  
+            </div>
             <div className="container col-lg">
             <form id="form_data " className="container row" onSubmit={handleAdd}>
                 <LoadingSpinner/> 
@@ -189,6 +196,13 @@ function Mon(){
 
     return(
         <div> 
+            <div className="row mt-4">
+                <div className="col text-start">
+                    <a href="/admin">
+                    <button className="btn btn-primary"> Tạo vật tư</button>
+                    </a>
+                </div>    
+            </div>
             <div className="container col-lg">
             <form id="form_data " className="container row" onSubmit={handleAdd}>
                 <div className="col">

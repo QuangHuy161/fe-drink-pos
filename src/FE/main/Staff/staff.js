@@ -439,79 +439,81 @@ export default class Demo extends React.PureComponent {
     } = this.state;
 
     return (
-      <Paper>
-        <Scheduler
-          data={data}
-          height={660}
-        >
-          <ViewState
-            currentDate={currentDate}
-          />
-          <EditingState
-            onCommitChanges={this.commitChanges}
-            onEditingAppointmentChange={this.onEditingAppointmentChange}
-            onAddedAppointmentChange={this.onAddedAppointmentChange}
-          />
-          <WeekView
-            startDayHour={startDayHour}
-            endDayHour={endDayHour}
-          />
-          <MonthView />
-          <AllDayPanel />
-          <EditRecurrenceMenu />
-          <Appointments />
-          <AppointmentTooltip
-            showOpenButton
-            showCloseButton
-            showDeleteButton
-          />
-          <Toolbar />
-          <ViewSwitcher />
-          <AppointmentForm
-            overlayComponent={this.appointmentForm}
-            visible={editingFormVisible}
-            onVisibilityChange={this.toggleEditingFormVisibility}
-          />
-          <DragDropProvider />
-        </Scheduler>
+      <div className='container'>
+        <Paper>
+          <Scheduler
+            data={data}
+            height={660}
+          >
+            <ViewState
+              currentDate={currentDate}
+            />
+            <EditingState
+              onCommitChanges={this.commitChanges}
+              onEditingAppointmentChange={this.onEditingAppointmentChange}
+              onAddedAppointmentChange={this.onAddedAppointmentChange}
+            />
+            <WeekView
+              startDayHour={startDayHour}
+              endDayHour={endDayHour}
+            />
+            <MonthView />
+            <AllDayPanel />
+            <EditRecurrenceMenu />
+            <Appointments />
+            <AppointmentTooltip
+              showOpenButton
+              showCloseButton
+              showDeleteButton
+            />
+            <Toolbar />
+            <ViewSwitcher />
+            <AppointmentForm
+              overlayComponent={this.appointmentForm}
+              visible={editingFormVisible}
+              onVisibilityChange={this.toggleEditingFormVisibility}
+            />
+            <DragDropProvider />
+          </Scheduler>
 
-        <Dialog
-          open={confirmationVisible}
-          onClose={this.cancelDelete}
-        >
-          <DialogTitle>
-            Delete Appointment
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Are you sure you want to delete this appointment?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.toggleConfirmationVisible} color="primary" variant="outlined">
-              Cancel
-            </Button>
-            <Button onClick={this.commitDeletedAppointment} color="secondary" variant="outlined">
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
+          <Dialog
+            open={confirmationVisible}
+            onClose={this.cancelDelete}
+          >
+            <DialogTitle>
+              Delete Appointment
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Are you sure you want to delete this appointment?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={this.toggleConfirmationVisible} color="primary" variant="outlined">
+                Cancel
+              </Button>
+              <Button onClick={this.commitDeletedAppointment} color="secondary" variant="outlined">
+                Delete
+              </Button>
+            </DialogActions>
+          </Dialog>
 
-        <StyledFab
-          color="secondary"
-          className={classes.addButton}
-          onClick={() => {
-            this.setState({ editingFormVisible: true });
-            this.onEditingAppointmentChange(undefined);
-            this.onAddedAppointmentChange({
-              startDate: new Date(currentDate).setHours(startDayHour),
-              endDate: new Date(currentDate).setHours(startDayHour + 1),
-            });
-          }}
-        >
-          <AddIcon />
-        </StyledFab>
-      </Paper>
+          <StyledFab
+            color="secondary"
+            className={classes.addButton}
+            onClick={() => {
+              this.setState({ editingFormVisible: true });
+              this.onEditingAppointmentChange(undefined);
+              this.onAddedAppointmentChange({
+                startDate: new Date(currentDate).setHours(startDayHour),
+                endDate: new Date(currentDate).setHours(startDayHour + 1),
+              });
+            }}
+          >
+            <AddIcon />
+          </StyledFab>
+        </Paper>
+      </div>
     );
   }
 }

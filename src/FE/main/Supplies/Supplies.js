@@ -145,6 +145,7 @@ function Supplies(){
                     onChange={(e) => {setVatlieu({...vatlieu,tien:e.target.value})}}/> 
                 </div>
                 <div className="row m-1">
+                    <label className="text-start col-5">Ảnh</label>
                     <input
                     onChange={convertToBase64}
                     type="file" className="form-control-file" accept="image/png, image/jpeg" />

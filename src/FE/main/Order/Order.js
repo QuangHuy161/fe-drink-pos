@@ -32,6 +32,7 @@ function Order(){
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     url: 'http://103.229.53.71:5000/mon',
                 })
+                
                 setMENU(MN.data)
                 setCT(ct.data)
             } catch (error) {
@@ -59,23 +60,29 @@ function Order(){
             if( topp.length === 0) return <></>
             let t = topp.map( (item,i) => 
                 <tr key={item.ten + i} className="text-start">
-                    <td className="pe-4">{item.ten}</td>
-                    <td >{item.gia}</td>
+                    <td style={{width: "10vw"}}></td>
+                    <td className="head-4 pe-4">{item.ten}</td>
+                    <td className="head-4" >{item.gia}</td>
                 </tr>
             )
 
-            return <td>{t}</td>
+            return <tr className="border-0">{t}</tr>
         }
         
         if (props.nguyenlieu[0]===undefined|| props.nguyenlieu[0]===null)
         return (<></>)
         let tdata=props.nguyenlieu.map((item,index) =>
-            <tr key={item.tenmon + index} >
-                <td className="h6" data={index}> {item.tenmon }</td>
-                <td className="h6 text-end"> {item.gia }</td>
+        <tr key={item.tenmon + index} >
+            <td>
+                <tr>
+                <td className="w-75 h4" data={index}> {item.tenmon }</td>
+                <td className="w-100"></td>
+                <td className="h4 text-end"> {item.gia }</td>
+                </tr>
                 <LoadTopping
                 topp={item.topping ===undefined ? []: item.topping}/>
-            </tr>
+            </td>
+        </tr>
         )
         return (
             <Modal
@@ -111,6 +118,19 @@ function Order(){
         e.preventDefault();
         setTempShow(true);
     }
+
+    const CalRevune = (order) =>{
+        //e.preventDefault();
+        
+        if(typeof(order[0])=== 'undefined' ) return order.gia;
+        else{
+            let sum = 0;
+            order.forEach( el =>{
+                sum+= el.gia;
+            })
+            return sum;
+        }
+    }
     function CalOut({onHide,order}){
         function LoadOrder(){
             let key,t;
@@ -118,7 +138,17 @@ function Order(){
             return (<></>)
             if(typeof(order[0])=== 'undefined' ){
                 if(new Date(order.time).getDate()!== new Date().getDate() ){
-                    localStorage.removeItem('temp_order_info')
+                    window.onload = ()=>{
+                        Axios.post("http://103.229.53.71:5000/reveune_day",
+                        {
+                            doanhthu: CalRevune(order),
+                            time: new Date()
+                        }
+                        )
+                        //console.log("loaded 1")
+                        localStorage.removeItem('temp_order_info')
+                    }
+                    
                 }
                 key= Object.keys(order)
                 t= key.map((el,i) => {
@@ -126,10 +156,15 @@ function Order(){
                     //     return <></>
                     // }
                     // else
+                    if((el === "tenkhachhang")){
+                        return <td className="ps-2 text-start" key={i} data={el}> {order[el]}</td>
+                    }
+                    else
                     if((el === "tiendua"||el === "tienthoi"||el === "gia")){
                         return <td 
                             key={i} 
                             data={el}
+                           className="text-end pe-2"
                             > 
                             {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order[el])}
                         </td>
@@ -147,6 +182,7 @@ function Order(){
                         > 
                             Chi tiết
                         </td>
+                        
                     else{
                         return <td key={i} data={el}> {order[el]}</td>
                     }
@@ -155,7 +191,17 @@ function Order(){
             }
             else{
                 if(new Date(order[0].time).getDate()!== new Date().getDate() ){
-                    localStorage.removeItem('temp_order_info')
+                    window.onload = ()=>{
+                        Axios.post("http://103.229.53.71:5000/reveune_day",
+                        {
+                            doanhthu: CalRevune(order),
+                            time: new Date()
+                        }
+                        )
+                        //console.log("loaded 2")
+
+                        localStorage.removeItem('temp_order_info')
+                    }
                 }
                 
                 key= Object.keys(order[0])
@@ -167,10 +213,15 @@ function Order(){
                             return <></>
                         }
                         else
+                        if((el === "tenkhachhang")){
+                            return <td className="ps-2 text-start" key={i} data={el}> {item[el]}</td>
+                        }
+                        else
                         if((el === "tiendua"||el === "tienthoi"||el === "gia")){
                             return <td 
                                 key={i} 
                                 data={el}
+                                className="text-end pe-2"
                                 > 
                                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item[el])}
                             </td>
@@ -245,10 +296,12 @@ function Order(){
     const addMon= (e) =>{
         e.preventDefault();
         let t={
+            id:"",
             tenmon:"",
             topping:[],
             gia:0
         }
+        t.id= e.target.attributes["data-id"].value
         t.tenmon= e.target.innerText
         t.gia=Number(e.target.attributes["data-price"].value)
         order.push(t)
@@ -261,10 +314,13 @@ function Order(){
        
         if(order.length=== 0) return;
         let topp ={
+            id:"",
             ten:"",
             gia:0
         }
+        topp.id= e.target.attributes["data-id"].value
         topp.ten= e.target.innerText;
+        //console.log (e)
         topp.gia=Number(e.target.attributes["data-price"].value)
 
         order.at(ind).topping.push(topp)
@@ -324,10 +380,10 @@ function Order(){
                     >
                         <img  className=""
                         src={item.img} alt="" />
-                        <p data={i} data-price={item.tien} className=" h4">{item.ten}</p>
+                        <p data={i} data-id={item._id} data-price={item.tien} className=" h4">{item.ten}</p>
                         
                     </div>
-                    <p className="h4">{item.tien}</p>
+                    <p className="h4">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.tien)}</p>
                 </div>
         )
         tdata_topping = tp.map( item =>
@@ -338,10 +394,10 @@ function Order(){
                     >
                             <img  className="" 
                              src={item.img} alt="" />
-                        <p data-price={item.tien} className=" h4" >{item.ten}</p>
+                        <p data-id={item._id} data-price={item.tien} className=" h4" >{item.ten}</p>
                         
                     </div>
-                    <p className="h4">{item.tien}</p>
+                    <p className="h4">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.tien)}</p>
                 </div>
         )
     }
@@ -361,7 +417,7 @@ function Order(){
             if( topp.length === 0) return <></>
             let t = topp.map( (item,i) => <tr key={item.ten + i} className="text-end">
                 <td >{item.ten}</td>
-                <td >{item.gia}</td>
+                <td >{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.gia)}</td>
                 <span className="pe link-danger" onClick={()=>delTopp(i)}><ClearIcon/></span>
             </tr>)
 
@@ -375,7 +431,7 @@ function Order(){
             <tr key={item.tenmon + index} className="border-bottom ">
                 <tr className="h5" key={item.tenmon} onClick={choosedMon}>
                         <td className={`pe text-start ${index === ind ? "active_item" : ""}`} data={index}> {item.tenmon }</td>
-                        <td className=""> {item.gia }</td>
+                        <td className=""> {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.gia)}</td>
                         <span className="pe  text-end link-danger" onClick={()=>delMon(index)}><DeleteForeverIcon/></span>
                 </tr>
                 <LoadTopping
@@ -401,19 +457,18 @@ function Order(){
 
     function checknumber(phoneNum)
     {
-    var phoneno = /^\d{10}$/;
-    if(phoneNum.match(phoneno)){
-        return true;
-    }
-    else{
-        alert("Vui lòng nhập lại số điện thoại khác")
-        return false;
+        if(phoneNum ==="") return true;
+        var phoneno = /^\d{10}$/;
+        if(phoneNum.match(phoneno)){
+            return true;
         }
-    }
+        else
+            return false;
+        }
 
     const [order_info,setOrder_info]= useState({
         tenkhachhang:"",
-        sdt:"0123456789",
+        sdt:"",
         tiendua:0,
         gia:0,
         tienthoi:0,
@@ -442,7 +497,7 @@ function Order(){
             alert("Vui lòng nhập đúng số tiền khách đưa")
             return
         }
-        if( ! checknumber(order_info.sdt))
+        if(!checknumber(order_info.sdt))
         {
             alert("Vui lòng nhập số điện thoại khác")
             return
@@ -462,18 +517,18 @@ function Order(){
         else{
             let arr= [];
             let t = JSON.parse(localStorage.getItem("temp_order_info"))
-            console.log(t)
+            //console.log(t)
             if(t.length ===undefined){
                 arr.push(JSON.parse(localStorage.getItem("temp_order_info")))
                 arr.push((order_info))
                 localStorage.setItem("temp_order_info",JSON.stringify(arr));
-                console.log(JSON.parse(localStorage.getItem("temp_order_info")))
+                //console.log(JSON.parse(localStorage.getItem("temp_order_info")))
             }
             else{
                 arr= JSON.parse(localStorage.getItem("temp_order_info"))
                 arr.push(order_info)
                 localStorage.setItem("temp_order_info",JSON.stringify(arr));
-                console.log(JSON.parse(localStorage.getItem("temp_order_info")))
+                //console.log(JSON.parse(localStorage.getItem("temp_order_info")))
             }
         }
         //CHECK OFFLINE +++++++++++++++++++
@@ -505,45 +560,59 @@ function Order(){
             //console.log(order_info)
             //CAL_OUT
             order.forEach(element =>{
-                let mon = CT.filter(item => item.tenmon === element.tenmon)[0]
+                console.log(element)
+                let mon = CT.filter(item => item._id === element.id)[0]
                 //console.log(mon)
                 //console.log("=============")
                 if(mon!==undefined){
                     mon.nguyenlieu.forEach(el1 => {
-                        //console.log(el1.ten,el1.donvi,el1.dinhluong)
+                        //console.log(el1)
                         let t = MENU.filter(mn =>
-                            mn.ten===el1.ten && mn.nhomvattu===el1.loai
+                            mn._id===el1.id
                             )[0]
+                        //console.log(t)
+                        
+                        if(t === undefined) alert(`${el1.ten} không có trong kho`)
+                        else{
                             t.soluong-=el1.dinhluong
-                            setMENU([...MENU])
                             Axios({
                                 method: 'PUT',
                                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                                 url: `http://103.229.53.71:5000/update/list_mon/${t._id}`,
                                 data:t
                             });
+                        }
+                        setMENU([...MENU])
+                        
                     })
                     //console.log("++++++++++++++++++++++++++++")
                     element.topping.forEach( el2 =>{
-                        let topp= CT.filter(item => item.tenmon === el2.ten)[0]
+                        let topp= CT.filter(item => item._id === el2.id)[0]
                         //console.log(topp)
                         //console.log("=============")
                         if(topp!== undefined){
                             topp.nguyenlieu.forEach(el_l => {
-                                console.log(el_l.ten,el_l.loai,el_l.donvi,el_l.dinhluong)
+                                //console.log(el_l.ten,el_l.loai,el_l.donvi,el_l.dinhluong)
                                 let t = MENU.filter(mn =>
-                                    mn.ten===el_l.ten 
-                                    && mn.nhomvattu===el_l.loai
+                                    mn._id===el_l.id 
                                     )[0]
+                                //console.log(t)
+                                
+                                if(t === undefined) alert(`${el_l.ten} không có trong kho`) 
+                                else{
                                     t.soluong-=el_l.dinhluong
-                                    setMENU([...MENU])
-                                    //console.log(t)
                                     Axios({
                                         method: 'PUT',
                                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                                         url: `http://103.229.53.71:5000/update/list_mon/${t._id}`,
                                         data:t
                                     });
+                                }
+                                setMENU([...MENU])
+                                
+                                //console.log(t)
+                                
+                                    //alert("Đã tạo đơn hàng")
                             })
                         }
                     })
@@ -591,7 +660,7 @@ function Order(){
                 <div className="col-sm m-0">
                     <div className="row">
                         <div className="col col-sm-7 p-0">
-                            <span className=" text-dark h3">Menu</span>
+                            <span className=" text-dark h3">Món</span>
                             <div data-spy="scroll" 
                             className="par-poit align-items-stretch d-flex flex-wrap bd-highlight mb-3">
                                 <LoadingSpinner/>
@@ -680,7 +749,7 @@ function Order(){
                 <div className="col-sm m-0">
                     <div className="row">
                         <div className="col col-sm-7 p-0">
-                            <span className=" text-dark h3">Menu</span>
+                            <span className=" text-dark h3">Món</span>
                             <div data-spy="scroll" 
                             className="par-poit align-items-stretch d-flex flex-wrap bd-highlight mb-3">
                                 {tdata_mon}

@@ -84,7 +84,7 @@ function Main(props ){
                 <div className="row m-1">
                     <button  className=" bt btn btn-menu rounded-1" onClick={() => setPageMode("nhanvien")} >
                         <span className="nav-link"  >
-                        Nhân Viên
+                        Ghi chú
                         </span>
                     </button>
                 </div>
@@ -120,7 +120,7 @@ function Main(props ){
                 </div>
                 <div className="row">
                     {t}
-                    <div className="col col-sm-10">
+                    <div className="col-sm-10">
                         <Statis/>
                     </div>
                 </div>

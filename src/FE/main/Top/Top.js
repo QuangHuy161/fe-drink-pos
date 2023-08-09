@@ -1,8 +1,8 @@
 import User from "./User/User";
-function Top(){
+function Top({auth}){
     return(
         <div className="top">
-            <User/>
+            <User auth={auth}/>
         </div>
     )
 }

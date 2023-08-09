@@ -1,22 +1,16 @@
 import { useLocation, Navigate, Outlet} from "react-router-dom";
-import AuthContext from "../context/AuthProvider";
-import { useContext } from "react";
 import {
     Link
   } from "react-router-dom";
 import Order from "../Order/Order";
 import Main from "../Main";
 import Create from "../Supplies/Create";
-const RequireAuth = ({ allowedRoles }) => {
-    const auth  = useContext(AuthContext);
-    console.log(allowedRoles===auth.role)
-    const location = useLocation();
+import { useState, useEffect } from "react";
+const RequireAuth = ({ allowedRoles}) => {
+    
     return (
-        auth.role===allowedRoles && auth.role==="admin" ?
-            <div>
+        JSON.parse(localStorage.getItem('acc')).role===allowedRoles && JSON.parse(localStorage.getItem('acc')).role==="admin" ?
                 <Main/>
-            </div>
-            
             : 
             <Order/>
     );

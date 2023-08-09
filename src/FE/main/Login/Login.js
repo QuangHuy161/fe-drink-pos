@@ -1,14 +1,13 @@
 import "./login.scss"
-import React, {useRef, useState} from "react"
+import React, {useRef, useState, useContext} from "react"
 import Axios from "axios"
 import AuthContext from "../context/AuthProvider";
-import { useContext } from "react";
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 
 function Login(props) {
   
-  const  auth  = useContext(AuthContext);
+  const  [auth,setAuth]  = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
@@ -24,6 +23,7 @@ function Login(props) {
   const [islogin, setLogin] = useState(false);
   const handleSubmit = (e) => {
     e.preventDefault();
+    
     if(authMode ==='signin'){
         Axios.post('http://103.229.53.71:5000/login',{
         fullname:fullname,
@@ -31,16 +31,14 @@ function Login(props) {
       }).then((result) => {
         setLogin(true)
         setRole(result.data.role)
-        const accessToken = result.data.token;
-
-        // auth.fullname=result.data.fullname
-        // auth.password=result.data.password
-        // auth.role = result.data.role
-        auth.accessToken=accessToken
-
-        console.log(auth)
-        
-
+        let t = {
+          fullname: result.data.fullname,
+          role: result.data.role,
+          token: result.data.token
+        }
+        setAuth(t)
+        console.log(authMode)
+        localStorage.setItem("acc",JSON.stringify(t))
         // navigate(from, { replace: true });
 
         if(result.data.role==='admin')

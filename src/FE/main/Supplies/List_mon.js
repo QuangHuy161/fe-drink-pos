@@ -16,6 +16,7 @@ function MyVerticallyCenteredModal(props) {
             </tr>
         else{
             let key = Object.keys(props.nguyenlieu[0])
+            key.shift()
              tdata = props.nguyenlieu.map( item =>
                 <tr >
                     {
@@ -79,7 +80,7 @@ function List_mon({data}) {
             nguyenlieu:list[Number(e.target.attributes['in'].value)].nguyenlieu
         }
         setDataModal(t)
-        console.log(t)
+        //console.log(t)
         setModalShow(true)
         
     }
@@ -103,8 +104,10 @@ function List_mon({data}) {
         let data=list
 
 
-        let thead = head.map( item =>
+        let thead = head.map( item => item !=="Tên món" ?
             <th scope="col" key={item}>{item}</th>
+            :
+            <th scope="col" className='text-start' key={item}>{item}</th>
         )
         let tdata;
         if(data[0]=== undefined) 

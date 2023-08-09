@@ -1,9 +1,45 @@
 import Axios from "axios"
-import React, { useCallback, useState } from "react"
+import React, { useState,useEffect } from "react"
 import DatePicker from "react-datepicker";
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+  } from 'chart.js';
+  import { Line } from 'react-chartjs-2';
 import "react-datepicker/dist/react-datepicker.css";
+//import Chart from "./Chart_Rev"
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+  );
+
+  export const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top' ,
+      },
+      title: {
+        display: true,
+        text: 'Thống kê doanh thu theo ngày',
+      },
+    },
+  };
+
+
 
 function getDate(time){
     let month = time.getUTCMonth() + 1
@@ -20,9 +56,28 @@ function Static(){
     const [revenue,setRevenue] =useState(0)
     const [modalShow, setModalShow] = useState(false);
     const [dataModal,setDataModal] =useState({})
+    const [rev,setRev] = useState()
+    useEffect(() => {
+        setTimeout(async () =>{
+            try {
+                let rev_30= await Axios({
+                    method: 'get',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    url: 'http://103.229.53.71:5000/reveune_30day',
+                })
+                setRev(rev_30.data)
+                //console.log(rev_30.data)
+            } catch (error) {
+                console.error(error);
+            } finally {
+            }
+            
+        },1000)
+        return ;
+    },[]);
 
     let top_link=(
-        <div className="row">
+        <div className="container row">
             <div className="pe rounded p-2 m-1 col-sm bt text-white"
             onClick={() => setPageStat('doanhso')}
             >
@@ -45,22 +100,28 @@ function Static(){
             if( topp.length === 0) return <></>
             let t = topp.map( (item,i) => 
                 <tr key={item.ten + i} className="text-start">
-                    <td className="pe-4">{item.ten}</td>
-                    <td >{item.gia}</td>
+                    <td style={{width: "10vw"}}></td>
+                    <td className="head-4 pe-4">{item.ten}</td>
+                    <td className="head-4">{item.gia}</td>
                 </tr>
             )
 
-            return <td>{t}</td>
+            return <tr className="border-0">{t}</tr>
         }
         
         if (props.nguyenlieu[0]===undefined|| props.nguyenlieu[0]===null)
         return (<></>)
         let tdata=props.nguyenlieu.map((item,index) =>
             <tr key={item.tenmon + index} >
-                <td className="h6" data={index}> {item.tenmon }</td>
-                <td className="h6 text-end"> {item.gia }</td>
-                <LoadTopping
-                topp={item.topping ===undefined ? []: item.topping}/>
+                <td>
+                    <tr>
+                    <td className="w-75 h4" data={index}> {item.tenmon }</td>
+                    <td className="w-100"></td>
+                    <td className="h4 text-end"> {item.gia }</td>
+                    </tr>
+                    <LoadTopping
+                    topp={item.topping ===undefined ? []: item.topping}/>
+                </td>
             </tr>
         )
         return (
@@ -110,10 +171,15 @@ function Static(){
                         return <></>
                     }
                     else
+                    if((el === "tenkhachhang")){
+                        return <td className="ps-2 text-start" key={i} data={el}> {item[el]}</td>
+                    }
+                    else
                     if((el === "tiendua"||el === "tienthoi"||el === "gia")){
                         return <td 
                             key={i} 
                             data={el}
+                            className="text-end pe-2"
                             > 
                             {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item[el])}
                         </td>
@@ -200,15 +266,31 @@ function Static(){
     }
     
 
-    let tg= <>từ ngày {startDate.toLocaleDateString('en-GB')} đến ngày {endDate.toLocaleDateString('en-GB')}</>
+    let tg= <>từ ngày {startDate.toLocaleDateString('en-GB')} đến trước ngày {endDate.toLocaleDateString('en-GB')}</>
     
+    const labels = rev === undefined ? [] :  rev.map( el => new Date(el.time).toLocaleString('en-GB'));
+
+    const chart_data = {
+        labels,
+        datasets: [
+          {
+            label: 'Doanh thu',
+            data:rev === undefined ? [] : rev.map((el) => el.doanhthu),
+            borderColor: 'rgb(53, 162, 235)',
+            backgroundColor: 'rgba(53, 162, 235, 0.5)',
+   
+          },
+        ],
+      };
+    
+
     if(pageStat==="doanhso")
     return(
         <div className="container Stat">
             {top_link}
             <h1>Doanh số</h1>
-            <div className="justify-content-center">
-                <div className="row" >
+            <div className="justify-content-center row" >
+                <div className="row col" >
                     <label className="m-1 col col-sm" style={{width: "20vw"}}> Từ ngày </label>
                     <div className="col-7-sm">
                     <DatePicker
@@ -222,7 +304,7 @@ function Static(){
                     />
                     </div>
                 </div>
-                <div className="row" >
+                <div className="row col" >
                     <label className="m-1 col col-sm" style={{width: "20vw"}}> đến trước ngày </label>
                     <div className="col-7-sm">
                     <DatePicker
@@ -244,21 +326,29 @@ function Static(){
                         Kết quả
                     </button>
                 </div>
-            <h4 className="mt-4">Thống kê đơn hàng và doanh số</h4>
-            <h4 className="mb-4">{tg}</h4>
-            <h5 className="mt-4"> Doanh thu: <SumPrice/></h5>
+            <h4 className="mt-4 h4">Thống kê đơn hàng và doanh số</h4>
+            <h4 className="mb-4 h4">{tg}</h4>
+            <h5 className="mt-4 h3"> Doanh thu: <SumPrice/></h5>
             <LoadOrder/>
             
         </div>
     )
     else
-    if(pageStat==="bieudo")
-    return(
-        <div className="container Stat">
-            {top_link}
-            <h1>Biểu đồ</h1>
-        </div>
-    )
+    if(pageStat==="bieudo"){
+        
+
+        return(
+            <div className="container Stat">
+                {top_link}
+                
+                <div id="chart_rev30" className="">
+                    <Line options={options} data={chart_data} />;
+                </div>
+            
+            </div>
+        )
+    }
+    
     
 }
 

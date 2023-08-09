@@ -6,23 +6,17 @@ import ClearIcon from '@mui/icons-material/Clear';
 
 
 function Mon(){
-    const [nguyenlieu,setNguyenlieu]=useState(
-        {
-            ten:'Nguyên liệu',
-            donvi:'Kilogram',
-            dinhluong:0,
-            loai:""
-        }
-    )
-    const [mon,setMon] = useState({
-        tenmon:"",
-        header:[],
-        nguyenlieu:[]
-    })
+    const [nguyenlieu,setNguyenlieu]=useState()
+    const [mon,setMon] = useState()
+
     const [mon_ct,setMon_ct] =useState([])
     const [MON,setMON]= useState([])
     const [NGUYENLIEU,setNGUYENLIEU]= useState([])
     const [isLoading, setIsLoading] = useState(false);
+
+    const [Index_Mon,setIndexMon] =useState(0)
+    const [Index_NL,setIndexNL] =useState(0)
+
 
     useEffect(() => {
         setTimeout(async () =>{
@@ -57,10 +51,23 @@ function Mon(){
                 })
                 setMon_ct(m_ct.data)
                 setMON(m);
-                setMon({...mon, tenmon : m[0].ten})
                 setNGUYENLIEU(nl); 
-                //console.log(nl[0].ten)
-                setNguyenlieu({...nguyenlieu, ten:nl[0].ten}); 
+
+                setMon({
+                    id:m[0]._id,
+                    tenmon:m[0].ten,
+                    header:[],
+                    nguyenlieu:[]
+                })
+
+                
+                setNguyenlieu({
+                    id:nl[0]._id,
+                    ten:nl[0].ten,
+                    donvi:nl[0].donvi,
+                    loai:nl[0].nhomvattu,
+                    dinhluong: 0
+                })
             } catch (error) {
                 console.error(error);
             } finally {
@@ -72,35 +79,81 @@ function Mon(){
     },[]);
   
 
+    const choosedMon =(e) =>{
+        e.preventDefault();
+        if(e!==undefined || e!==null)
+        //e.target.classList.toggle("active_item");
+        var ind= Number(e.target.options[e.target.selectedIndex].attributes['data_ind'].value)
+        setIndexMon(ind)
+
+        mon.id= MON[ind]._id
+        mon.tenmon= MON[ind].ten
+        setMon({...mon})
+        //console.log(mon)
+    }
+    const choosedNL =(e) =>{
+        e.preventDefault();
+        if(e!==undefined || e!==null)
+        var ind= Number(e.target.options[e.target.selectedIndex].attributes['data_ind'].value)
+
+        setIndexNL(ind)
+        let t= {
+            id:NGUYENLIEU[ind]._id,
+            ten: NGUYENLIEU[ind].ten,
+            donvi: NGUYENLIEU[ind].donvi,
+            loai: NGUYENLIEU[ind].nhomvattu
+        }
+
+        // nguyenlieu.id= NGUYENLIEU[ind]._id
+        // nguyenlieu.ten= NGUYENLIEU[ind].ten
+        // nguyenlieu.donvi= NGUYENLIEU[ind].donvi
+        // nguyenlieu.loai= NGUYENLIEU[ind].nhomvattu
+        //nguyenlieu.dinhluong= 0
+        
+        //setNguyenlieu({...nguyenlieu})
+        setNguyenlieu(t)
+        
+    }
     
-    
+    const updateDinhluong= (e) =>{
+        e.preventDefault();
+        // nguyenlieu.dinhluong= Number(e.target.innerHTML)
+        // setNguyenlieu({...nguyenlieu})
+        console.log(Number(e.target.innerHTML))
+    }
+
     let mon_option= MON
-    .map(item => 
-            <option key={item._id} value={item.ten} >
-                |{item.nhomvattu}| {item.ten} ({item.soluong} {item.donvi})
+    .map((item,index) => 
+            <option key={item._id} data_ind={index} 
+            
+            >
+                |{item.nhomvattu}|- {item.ten}- ({item.soluong} {item.donvi})
                 </option>
         )
 
     let nguyenlieu_option= NGUYENLIEU
-    .map( item => 
+    .map((item,index) => 
         <option key={item._id} 
-        data_donvi={item.donvi} 
-        data_loai={item.nhomvattu} 
-        value={item.ten} 
+        data_ind={index}
+     
         >
-         |{item.nhomvattu}| {item.ten} ({item.soluong} {item.donvi})</option>
+         |{item.nhomvattu}|- {item.ten} -({item.soluong} {item.donvi})</option>
         )
   
     const handleAdd = (e )=>{
         e.preventDefault();
+        
         mon.nguyenlieu.push(nguyenlieu)
         mon.header = Object.keys(mon.nguyenlieu[0])
+
         setMon({...mon})
+        //console.log(mon)
     }
 
     const handleSubmit = (e) => {
         e.preventDefault();
         let body = {
+            id: mon.id,
             tenmon:mon.tenmon,
             nguyenlieu:mon.nguyenlieu
         }
@@ -111,8 +164,9 @@ function Mon(){
         } finally {
             mon_ct.push(body)
             setMon_ct([...mon_ct])
-            alert(`đã thêm món ${mon.tenmon}`)
+            //console.log(body.id)
             //Reset
+            alert(`đã thêm món ${mon.tenmon}`)
             mon.nguyenlieu=[]
             setMon({...mon})
         }
@@ -125,9 +179,13 @@ function Mon(){
         setMon({...mon})
     }
     function ShowTable(){
-        let title=mon.tenmon
+        
+        let title="Tên món"
+        if(MON[Index_Mon] !== undefined) title=MON[Index_Mon].ten
         let head=["Tên","Đơn vị","Phân loại","Định lượng"]
-        let data=mon.nguyenlieu
+        let data= mon===undefined ? [] : mon.nguyenlieu
+        // console.log("+++++++++++++++++++")
+        // console.log(nguyenlieu,mon.nguyenlieu)
         let thead = head.map( item =>
             <th scope="col" key={item}>{item}</th>
         )
@@ -138,10 +196,11 @@ function Mon(){
             <></>
         else{
             let key = Object.keys(data[0])
+            key.shift()
              tdata = data.map( (item,i) =>
                 <tr  key={item.ten}>
                     {
-                        key.map(i =>
+                        key.map(i => 
                             <td key={i}>{item[i]}</td>
                         )
                     }
@@ -211,7 +270,8 @@ function Mon(){
                         <label className="text-start col-5" >Tên món</label>
                         <select required className="col-7 border p-1 rounded-1" 
                         onChange={(e) => {
-                            setMon({...mon,tenmon:e.target.value});
+                            //setMon({...mon,tenmon:e.target.value});
+                            choosedMon(e)
                         }}
                         >
                             {mon_option}
@@ -222,20 +282,28 @@ function Mon(){
                     <div className="row m-1">
                         <label className="text-start col-5" >Nguyên liệu</label>
                         <select required className="col-7 border p-1 rounded-1" 
-                        onChange={ (e) =>{
-                                let t ={
-                                ten:e.target.value,
-                                donvi:e.target
-                                .options[e.target.selectedIndex]
-                                .attributes['data_donvi']
-                                .value,
-                                loai:e.target
-                                .options[e.target.selectedIndex]
-                                .attributes['data_loai']
-                                .value,
-                                dinhluong:0,
-                            }
-                        setNguyenlieu(t)
+                        // onChange={ (e) =>{
+                        //         let t ={
+                        //         ten:e.target.value,
+                        //         donvi:e.target
+                        //         .options[e.target.selectedIndex]
+                        //         .attributes['data_donvi']
+                        //         .value,
+                        //         loai:e.target
+                        //         .options[e.target.selectedIndex]
+                        //         .attributes['data_loai']
+                        //         .value,
+                        //         tonkho:e.target
+                        //         .options[e.target.selectedIndex]
+                        //         .attributes['data_tonkho']
+                        //         .value,
+                        //         dinhluong:0,
+                        //     }
+                        // setNguyenlieu(t)
+                        // }}
+                        onChange={(e) => {
+                            //setMon({...mon,tenmon:e.target.value});
+                            choosedNL(e)
                         }}
                         >
                             {nguyenlieu_option}
@@ -245,8 +313,18 @@ function Mon(){
                         <label className="text-start col-5"> Định lượng nguyên liệu</label>
                         <input className="col-7 border p-1 rounded-1" type="number" min="0" step="any"
                         onChange={(e) => {
-                            setNguyenlieu({...nguyenlieu,dinhluong:e.target.value})
+                            nguyenlieu.dinhluong= e.target.value
+                            setNguyenlieu({...nguyenlieu})
                         }}
+
+                        // onChange={(e) => {
+                        //     if(e.target.value < nguyenlieu.tonkho)
+                        //         setNguyenlieu({...nguyenlieu,dinhluong:e.target.value})
+                        //     else {
+                        //         alert("định lượng lớn hơn tồn kho")
+                        //         e.target.value=0
+                        //     }
+                        // }}
                         /> 
                     </div>
                 </div>

@@ -50,11 +50,13 @@ function Mon(){
                     
                 })
                 setMon_ct(m_ct.data)
+                //console.log(m_ct.data)
                 setMON(m);
                 setNGUYENLIEU(nl); 
-
+                console.log(nl)
                 setMon({
                     id:m[0]._id,
+                    loai:m[0].nhomvattu,
                     tenmon:m[0].ten,
                     header:[],
                     nguyenlieu:[]
@@ -85,8 +87,8 @@ function Mon(){
         //e.target.classList.toggle("active_item");
         var ind= Number(e.target.options[e.target.selectedIndex].attributes['data_ind'].value)
         setIndexMon(ind)
-
         mon.id= MON[ind]._id
+        mon.loai= MON[ind].nhomvattu
         mon.tenmon= MON[ind].ten
         setMon({...mon})
         //console.log(mon)
@@ -104,30 +106,18 @@ function Mon(){
             loai: NGUYENLIEU[ind].nhomvattu
         }
 
-        // nguyenlieu.id= NGUYENLIEU[ind]._id
-        // nguyenlieu.ten= NGUYENLIEU[ind].ten
-        // nguyenlieu.donvi= NGUYENLIEU[ind].donvi
-        // nguyenlieu.loai= NGUYENLIEU[ind].nhomvattu
-        //nguyenlieu.dinhluong= 0
         
-        //setNguyenlieu({...nguyenlieu})
         setNguyenlieu(t)
         
     }
     
-    const updateDinhluong= (e) =>{
-        e.preventDefault();
-        // nguyenlieu.dinhluong= Number(e.target.innerHTML)
-        // setNguyenlieu({...nguyenlieu})
-        console.log(Number(e.target.innerHTML))
-    }
 
     let mon_option= MON
     .map((item,index) => 
             <option key={item._id} data_ind={index} 
             
             >
-                |{item.nhomvattu}|- {item.ten}- ({item.soluong} {item.donvi})
+                |{item.nhomvattu}|- {item.ten}- ({Number(item.soluong)>0? Number(item.soluong).toFixed(4):Number(item.soluong)} {item.donvi})
                 </option>
         )
 
@@ -137,7 +127,7 @@ function Mon(){
         data_ind={index}
      
         >
-         |{item.nhomvattu}|- {item.ten} -({item.soluong} {item.donvi})</option>
+         |{item.nhomvattu}|- {item.ten} -( {Number(item.soluong)>0? Number(item.soluong).toFixed(4):Number(item.soluong) } {item.donvi})</option>
         )
   
     const handleAdd = (e )=>{
@@ -154,23 +144,63 @@ function Mon(){
         e.preventDefault();
         let body = {
             id: mon.id,
+            loai:mon.loai,
             tenmon:mon.tenmon,
             nguyenlieu:mon.nguyenlieu
         }
-        try {
-            Axios.post('http://103.229.53.71:5000/themmon', body)
-        } catch (error) {
-            console.error(error);
-        } finally {
-            mon_ct.push(body)
-            setMon_ct([...mon_ct])
-            //console.log(body.id)
-            //Reset
-            alert(`đã thêm món ${mon.tenmon}`)
-            mon.nguyenlieu=[]
-            setMon({...mon})
+        if(body.loai !=="Nguyên liệu tổng hợp")
+            try {
+                Axios.post('http://103.229.53.71:5000/themmon', body)
+            } catch (error) {
+                console.error(error);
+            } finally {
+                mon_ct.push(body)
+                setMon_ct([...mon_ct])
+                //console.log(body.id)
+                //Reset
+                alert(`đã thêm món ${mon.tenmon}`)
+                mon.nguyenlieu=[]
+                setMon({...mon})
+            }
+        else{
+            try {
+                Axios.post('http://103.229.53.71:5000/themmon', body)
+            } catch (error) {
+                console.error(error);
+            } finally {
+                //UPDATE vật tư
+                body.nguyenlieu.forEach(el1 => {
+                    //console.log(el1)
+                    let t = NGUYENLIEU.filter(mn =>
+                        mn._id===el1.id
+                        )[0]
+                    //console.log(t)
+                    
+                    if(t === undefined) alert(`${el1.ten} không có trong kho`)
+                    else{
+                        t.soluong-=el1.dinhluong
+                        let ID= t._id
+                        console.log(t)
+                        Axios({
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            url: `http://103.229.53.71:5000/update/list_mon/${ID}`,
+                            data:t
+                        });
+                    }
+                    setNGUYENLIEU([...NGUYENLIEU])
+                    
+                })
+
+                mon_ct.push(body)
+                setMon_ct([...mon_ct])
+                //console.log(body.id)
+                //Reset
+                alert(`đã thêm món ${mon.tenmon}`)
+                mon.nguyenlieu=[]
+                setMon({...mon})
+            }
         }
-        
         
     }
 

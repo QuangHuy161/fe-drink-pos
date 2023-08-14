@@ -378,9 +378,10 @@ function Order(){
                     onClick={addMon} 
                     key={i}
                     >
+                        <p data={i} data-id={item._id} data-price={item.tien} className=" h4">{item.ten}</p>
                         <img  className=""
                         src={item.img} alt="" />
-                        <p data={i} data-id={item._id} data-price={item.tien} className=" h4">{item.ten}</p>
+                        
                         
                     </div>
                     <p className="h4">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.tien)}</p>
@@ -392,10 +393,9 @@ function Order(){
                     onClick ={addTopping}
                     data={item.ten} 
                     >
-                            <img  className="" 
-                             src={item.img} alt="" />
                         <p data-id={item._id} data-price={item.tien} className=" h4" >{item.ten}</p>
-                        
+                        <img  className="" 
+                        src={item.img} alt="" />
                     </div>
                     <p className="h4">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.tien)}</p>
                 </div>
@@ -560,8 +560,8 @@ function Order(){
             //console.log(order_info)
             //CAL_OUT
             order.forEach(element =>{
-                console.log(element)
-                let mon = CT.filter(item => item._id === element.id)[0]
+                //console.log(element)
+                let mon = CT.filter(item => item.id === element.id)[0]
                 //console.log(mon)
                 //console.log("=============")
                 if(mon!==undefined){
@@ -575,10 +575,12 @@ function Order(){
                         if(t === undefined) alert(`${el1.ten} không có trong kho`)
                         else{
                             t.soluong-=el1.dinhluong
+                            let ID= t._id
+                            console.log(t)
                             Axios({
                                 method: 'PUT',
                                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                                url: `http://103.229.53.71:5000/update/list_mon/${t._id}`,
+                                url: `http://103.229.53.71:5000/update/list_mon/${ID}`,
                                 data:t
                             });
                         }
@@ -587,7 +589,8 @@ function Order(){
                     })
                     //console.log("++++++++++++++++++++++++++++")
                     element.topping.forEach( el2 =>{
-                        let topp= CT.filter(item => item._id === el2.id)[0]
+                        //console.log(el2)
+                        let topp= CT.filter(item => item.id === el2.id)[0]
                         //console.log(topp)
                         //console.log("=============")
                         if(topp!== undefined){
@@ -601,12 +604,14 @@ function Order(){
                                 if(t === undefined) alert(`${el_l.ten} không có trong kho`) 
                                 else{
                                     t.soluong-=el_l.dinhluong
+                                    let ID= t._id
                                     Axios({
                                         method: 'PUT',
                                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                                        url: `http://103.229.53.71:5000/update/list_mon/${t._id}`,
+                                        url: `http://103.229.53.71:5000/update/list_mon/${ID}`,
                                         data:t
                                     });
+                                    alert("Đã update")
                                 }
                                 setMENU([...MENU])
                                 
